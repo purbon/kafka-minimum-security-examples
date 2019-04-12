@@ -6,6 +6,7 @@
 This is a collection of minimum security permissions necessary to run Apache Kafka application such as:
 
 * [Kafka Streams](kstreams/)
+* [Monitoring](monitoring/)
 * Kafka Connect (Pending)
 * ...
 
