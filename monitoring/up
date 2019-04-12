@@ -7,14 +7,15 @@ docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=z
 
 
 ## Confluent interceptors minimum permissions
-docker-compose exec kafka kafka-acls -authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:ANONYMOUS --operation Read --operation Describe  --topic __confluent.support.metrics --group '*'
+docker-compose exec kafka kafka-acls -authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:ANONYMOUS --operation Describe  --topic __confluent.support.metrics --group '*'
 docker-compose exec kafka kafka-acls -authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:ANONYMOUS --operation Write --topic __confluent.support.metrics
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:ANONYMOUS --operation Write --operation Describe --topic _confluent-metrics
+
+## Necessary as the first one reporting metrics will try to create the topic in the cluster
 docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --cluster --operation=Create --allow-principal User:ANONYMOUS
 
-docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:ANONYMOUS --operation Read --operation Write --operation Describe --topic _confluent-metrics
-
-docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:alice --operation Read  --operation Describe --topic _confluent-metrics --group '*'
-docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:alice --operation Write  --topic _confluent-metrics
+## Used to consume the metrics, in other cases this could be the console consumer or Control Center for example.
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:alice --operation Read  --topic _confluent-metrics --group '*'
 
 
 echo "Example configuration:"
