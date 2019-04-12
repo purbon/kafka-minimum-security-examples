@@ -17,6 +17,17 @@ docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=z
 ## Used to consume the metrics, in other cases this could be the console consumer or Control Center for example.
 docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:alice --operation Read  --topic _confluent-metrics --group '*'
 
+## Confluent Interceptors
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:alice --operation Write --operation Describe --topic  _confluent-monitoring
+## Only for inspection purposes and seeing metrics are being produced
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:alice --operation Read --topic  _confluent-monitoring
+
+
+## Used within the app
+docker-compose exec kafka kafka-acls -authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:alice --operation Read --operation Describe  --topic topicA --group '*'
+docker-compose exec kafka kafka-acls -authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:alice --operation Write --topic topicA
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --cluster --operation=Create --allow-principal User:alice
+
 
 echo "Example configuration:"
 echo "Should succeed (alice authorized)"
