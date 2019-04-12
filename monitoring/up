@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+docker-compose up -d --build
+
+
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --cluster --operation=All --allow-principal=User:kafka
+
+
+## Confluent interceptors minimum permissions
+docker-compose exec kafka kafka-acls -authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:ANONYMOUS --operation Read --operation Describe  --topic __confluent.support.metrics --group '*'
+docker-compose exec kafka kafka-acls -authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:ANONYMOUS --operation Write --topic __confluent.support.metrics
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --cluster --operation=Create --allow-principal User:ANONYMOUS
+
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:ANONYMOUS --operation Read --operation Write --operation Describe --topic _confluent-metrics
+
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:alice --operation Read  --operation Describe --topic _confluent-metrics --group '*'
+docker-compose exec kafka kafka-acls --authorizer-properties zookeeper.connect=zookeeper:2181 --add --allow-principal User:alice --operation Write  --topic _confluent-metrics
+
+
+echo "Example configuration:"
+echo "Should succeed (alice authorized)"
+echo "-> docker-compose exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic _confluent-metrics --from-beginning --consumer.config=/etc/kafka/alice.properties --formatter io.confluent.metrics.reporter.ConfluentMetricsFormatter"
+echo "Should fail (bob is NOT authorized)"
+echo "-> docker-compose exec kafka kafka-console-producer --broker-list kafka:9092 --topic target-topic --producer.config=/etc/kafka/bob.properties"
